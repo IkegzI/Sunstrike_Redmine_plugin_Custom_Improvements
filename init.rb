@@ -10,10 +10,19 @@ Redmine::Plugin.register :sunstrike_redmine_plugin_custom_improvements do
   require_dependency 'improvements'
 
 
-  default_settings = Additionals.load_settings
-  settings(default: default_settings, partial: 'improvements/settings/improvements')
+  # путь к странице
+  # settings(default: default_settings, partial: 'improvements/settings/improvements')
+  default_settings = Improvements.load_settings
+  settings(default: default_settings, partial: 'improvements/settings/sunstrike_redmine_plugin_custom_improvements')
 
+  object_to_prepare = Rails.configuration
+  #patchs connection
+  object_to_prepare.to_prepare do
+    require_relative "./lib/patches/time_task_overrun/query_patch.rb"
+    require_relative "./lib/patches/time_task_overrun/queries_helper_patch.rb"
+    Query.send(:include, TimeTaskOverrun::Patches::QueryPatch)
+    QueriesHelper.send(:include, TimeTaskOverrun::Patches::QueriesHelperPatch)
+  end
 
-
-  menu :admin_menu, :sunstrike_redmine_plugin_custom_improvements, { controller: 'settings', action: 'plugin', id: 'improvements' }, caption: :label_improvements
+  menu :admin_menu, :sunstrike_redmine_plugin_custom_improvements, { controller: 'settings', action: 'plugin', id: 'sunstrike_redmine_plugin_custom_improvements' }, caption: :label_improvements
 end
